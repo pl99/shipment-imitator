@@ -1,0 +1,44 @@
+targetdatasource:
+  datasource:
+    url: jdbc:postgresql://fedora:5432/shipment-service
+    username: 'postgres'
+    password: 'postgres'
+
+    hikari:
+      maximum-pool-size: 3
+#      jdbc-url: ${spring.datasource.url}
+  jpa:
+    database: default
+
+
+
+
+srcdatasource:
+  datasource:
+#    url: jdbc:postgresql://fedora:5432/shipment-service
+    url: jdbc:postgresql://172.16.145.213:5432/shipment-service
+    username: 'adv'
+    password: 'adv'
+
+    hikari:
+      maximum-pool-size: 3
+#      jdbc-url: ${srcdatasource.datasource.url}
+#      jdbc-url: jdbc:postgresql://172.16.145.213:5432/shipment-service
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: true
+
+
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
+
