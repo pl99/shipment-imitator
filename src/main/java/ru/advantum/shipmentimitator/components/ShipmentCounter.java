@@ -4,9 +4,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.stereotype.Component;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import ru.advantum.shipmentimitator.sourcedb.repository.SrcShipmentRepository;
 
 import java.time.LocalDate;
@@ -15,18 +15,13 @@ import java.util.concurrent.Callable;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Command(name = "sco")
-public class ShipmentCounter implements Callable<Integer> {
-
-    @Option(names = "--from", required = true, description = "Начало периода")
-    String from;
-
-    @Option(names = "--to", required = true, description = "Окончание периода")
-    String to;
+public class ShipmentCounter {
 
     private final SrcShipmentRepository repository;
 
-    private String sourceShipmentCount(String from, String to) {
+    @ShellMethod
+    private String sourceShipmentCount(@ShellOption( value = "--from", help = "Начало периода") String from,
+                                       @ShellOption( value = "--to", help = "Окончание периода")String to) {
         LocalDate fromDt = LocalDate.parse(from);
         LocalDate toDt = LocalDate.parse(to);
         Long countShipmentByDeliveryDateBetween = repository.countShipmentByDeliveryDateBetween(fromDt, toDt);
@@ -34,9 +29,4 @@ public class ShipmentCounter implements Callable<Integer> {
 
     }
 
-    @Override
-    public Integer call() throws Exception {
-        sourceShipmentCount(this.from, this.to);
-        return 0;
-    }
 }

@@ -4,8 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.BeanUtils;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import picocli.CommandLine;
 import ru.advantum.shipmentimitator.sourcedb.model.SrcShipment;
 import ru.advantum.shipmentimitator.sourcedb.repository.SrcPointPassRepository;
 import ru.advantum.shipmentimitator.sourcedb.repository.SrcShipmentPointRepository;
@@ -24,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CopyShipment {
@@ -36,7 +39,7 @@ public class CopyShipment {
     TrgPointPassRepository trgPointPassRepository;
     ShipmentSpecification shipmentSpecification;
 
-//    @ShellMethod(key = {"shc"}, value = "Подсчитать общее количество рейсов")
+    @ShellMethod(key = {"shc"}, value = "Подсчитать общее количество рейсов")
     public String counts() {
         long sourceCount = sourceRepository.count();
         long targetCount = targetRepository.count();
@@ -44,8 +47,8 @@ public class CopyShipment {
     }
 
     @Transactional
-//    @ShellMethod(key = {"sco"}, value = "скопировать рейс по id")
-    public String copyOnce(@CommandLine.Option(names = {"shipmentId, id"}) Long shipmentID) {
+    @ShellMethod(key = {"sco"}, value = "скопировать рейс по id")
+    public String copyOnce(@ShellOption({"shipmentId, id"}) Long shipmentID) {
         SrcShipment shipment = sourceRepository.findById(shipmentID)
                 .orElseThrow(EntityNotFoundException::new);
         TrgShipment trg = targetRepository.findById(shipmentID)
@@ -61,24 +64,24 @@ public class CopyShipment {
         return "copied";
     }
 
-//    @Transactional
-//    @ShellMethod(key = {"sco-date"}, value = "скопировать рейсы по дате доставки")
-//    public String copyForDeliveryDate(@ShellOption({"from"}) String from, @ShellOption(value = {"to"}, defaultValue = ShellOption.NONE) String to) {
-//        LocalDate fromDt = LocalDate.parse(from);
-//        LocalDate toDt = ShellOption.NONE.equals(to) ? null : LocalDate.parse(to);
-//
-//        List<SrcShipment> shipments = sourceRepository.findAll(shipmentSpecification.shipmentByDeliveryDay(fromDt, toDt));
-//        List<TrgShipment> targets = shipments.stream().map(this::copyShipment).collect(Collectors.toList());
-//        List<Long> shipmentIds = shipments.stream().map(SrcShipment::getId).collect(Collectors.toList());
-//        List<TrgShipmentPoint> targetPoints = createTargetShipmentPoints(shipmentIds);
-//        List<TrgPointPass> targetPointPasss = createTargetPointPasss(shipmentIds);
-//
-//
-//        List<TrgShipment> trgShipments = targetRepository.saveAllAndFlush(targets);
-//        trgShipmentPointRepository.saveAllAndFlush(targetPoints);
-//        trgPointPassRepository.saveAllAndFlush(targetPointPasss);
-//        return "copied from " + shipments.size() + " to " + trgShipments.size();
-//    }
+    @Transactional
+    @ShellMethod(key = {"sco-date"}, value = "скопировать рейсы по дате доставки")
+    public String copyForDeliveryDate(@ShellOption({"from"}) String from, @ShellOption(value = {"to"}, defaultValue = ShellOption.NONE) String to) {
+        LocalDate fromDt = LocalDate.parse(from);
+        LocalDate toDt = ShellOption.NONE.equals(to) ? null : LocalDate.parse(to);
+
+        List<SrcShipment> shipments = sourceRepository.findAll(shipmentSpecification.shipmentByDeliveryDay(fromDt, toDt));
+        List<TrgShipment> targets = shipments.stream().map(this::copyShipment).collect(Collectors.toList());
+        List<Long> shipmentIds = shipments.stream().map(SrcShipment::getId).collect(Collectors.toList());
+        List<TrgShipmentPoint> targetPoints = createTargetShipmentPoints(shipmentIds);
+        List<TrgPointPass> targetPointPasss = createTargetPointPasss(shipmentIds);
+
+
+        List<TrgShipment> trgShipments = targetRepository.saveAllAndFlush(targets);
+        trgShipmentPointRepository.saveAllAndFlush(targetPoints);
+        trgPointPassRepository.saveAllAndFlush(targetPointPasss);
+        return "copied from " + shipments.size() + " to " + trgShipments.size();
+    }
 
     private List<TrgShipmentPoint> createTargetShipmentPoints(List<Long> shipmentIds) {
         return srcShipmentPointRepository.findAllByShipmentIdIn(shipmentIds)
