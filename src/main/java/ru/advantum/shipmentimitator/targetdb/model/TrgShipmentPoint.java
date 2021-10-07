@@ -1,10 +1,9 @@
-package ru.advantum.shipmentimitator.sourcedb.model;
+package ru.advantum.shipmentimitator.targetdb.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -15,8 +14,10 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
-public class ShipmentPoint {
+@NoArgsConstructor
+@DynamicUpdate
+@DynamicInsert
+public class TrgShipmentPoint {
     @Id
     @Column(name = "id", nullable = false)
     private Long id;
@@ -100,16 +101,12 @@ public class ShipmentPoint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        ShipmentPoint that = (ShipmentPoint) o;
+        TrgShipmentPoint that = (TrgShipmentPoint) o;
         return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
         return 0;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 }
