@@ -67,9 +67,9 @@ public class CopyShipment {
 
     @Transactional
     @ShellMethod(key = {"sco-date"}, value = "скопировать рейсы по дате доставки")
-    public String copyForDeliveryDate(@ShellOption({"from"}) String from, @ShellOption(value = {"to"}, defaultValue = ShellOption.NONE) String to) {
+    public String copyForDeliveryDate(@ShellOption({"from"}) String from, @ShellOption(value = {"to"}) String to) {
         LocalDate fromDt = LocalDate.parse(from);
-        LocalDate toDt = ShellOption.NONE.equals(to) ? null : LocalDate.parse(to);
+        LocalDate toDt = ShellOption.NONE.equals(to) ? fromDt : LocalDate.parse(to);
 
         List<SrcShipment> shipments = sourceRepository.findAll(shipmentSpecification.shipmentByDeliveryDay(fromDt, toDt));
         List<TrgShipment> targets = shipments.stream().map(this::copyShipment).collect(Collectors.toList());
